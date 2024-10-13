@@ -60,7 +60,7 @@ const Approval = () => {
     const approhandler=(e)=>{
 
         console.log(e)
-        let url="http://localhost:8000/api/approval/"
+        let url="http://localhost:8000/api/lspappro/"
         let body={
             "approval_id":reid,
             "status":"approved"
@@ -106,7 +106,7 @@ const handleOpenappro=(targ)=>{
 
     const rejecthandler=(e)=>{
         console.log(e)
-        let url="http://localhost:8000/api/approval/"
+        let url="http://localhost:8000/api/lspappro/"
         let body={
             "approval_id":reid,
             "status":"rejected"
@@ -134,23 +134,7 @@ const handleOpenappro=(targ)=>{
             localStorage.clear()
 
     }
-    const formopen=(idd)=>{
-      setShowForm(true);
-  
-      const localdata = JSON.parse(localStorage.getItem("token"));
-      let url ="http://127.0.0.1:8000/api/approval/?approval_id="+idd
-  
-      axios.get(url).then((response)=>{
-        setnewdata(response.data.data)
-        setnewdatakeys(response.data.new_data_keys)
-        setnewdatavals(response.data.new_data_vals)
-
-
-  
-      
-        
-      })
-  }
+   
     return (
         <div>
 

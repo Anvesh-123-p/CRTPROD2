@@ -20,45 +20,48 @@ const Faculty_Profile = () => {
 
     }
     const [mobile,setmobile]=useState();
+    const [subjects,setsubjects]=useState([]);
+    const [classes,setclasses]=useState([]);
     const [profile,setprofile]=useState();
 
 
     const [name,setname]=useState();
-
+    const [data2,setdata2]=useState([]);
     const [email,setemail]=useState();
 
     const [exp,setexp]=useState();
     const [gender,setgen]=useState();
 
-    const [designation,setdesign]=useState("--");
+    const [designation,setdesign]=useState();
 
-    const [qualification,setquali]=useState("--");
+    const [qualification,setquali]=useState();
     const [dept,setdept]=useState();
     const [idd,setidd]=useState();
-
-
-let localdata=""
+    let localdata=''
     if(localStorage.getItem('token')!=null){
 
-      localdata = JSON.parse(localStorage.getItem("token")).email;
-  }
-  
-  
-  
-      let url="http://localhost:8000/api/users/?email="+localdata
-      console.log(url)
+    localdata = JSON.parse(localStorage.getItem("token")).email;
+}
+
+
+
+    let url="http://localhost:8000/api/users/?email="+localdata
     useEffect(() => {
       
       axios.get(url).then((response)=>{
+        console.log(response.data.data.subjects)
         setname(response.data.data.name)
         setemail(response.data.data.email)
         setmobile(response.data.data.mobile_number)
+        setsubjects(response.data.data.subjects)
+        setclasses(response.data.data.classes)
         setdesign(response.data.data.designation)
         setquali(response.data.data.qualification)
         setdept(response.data.data.dept)
         setexp(response.data.data.experience)
         setgen(response.data.data.gender)
         setidd(response.data.data.id)
+        setdata2(response.data.data2)
         setprofile(response.data.data.profile_photo)
 
 
@@ -83,24 +86,26 @@ let localdata=""
     <div className={`collapse navbar-collapse ${styles.collapse}`} id="navbarSupportedContent">
       <ul className={`navbar-nav me-auto mb-2 mb-lg-0 ${styles.navbar_nav}`}>
         <li className={`nav-item ${styles.nav_item}`}>
-          <Link to="/Faculty/home" className={`nav-link ${styles.nav_link}`} aria-current="page">Home</Link>
+          <Link to="/faculty/home" className={`nav-link ${styles.nav_link}`} aria-current="page">Home</Link>
         </li>
         <li className={`nav-item ${styles.nav_item}`}>
-          <Link to="/Faculty/Class_View" className={`nav-link ${styles.nav_link}`}>Classes</Link>
+          <Link to="/faculty/Class_View" className={`nav-link ${styles.nav_link}`}>Classes</Link>
         </li>
         <li className={`nav-item ${styles.nav_item}`}>
-          <Link to="/Faculty/Faculty_View" className={`nav-link ${styles.nav_link}`}>Faculty</Link>
+          <Link to="/faculty/Faculty_View" className={`nav-link ${styles.nav_link}`}>Faculty</Link>
         </li>
         <li className={`nav-item ${styles.nav_item}`}>
-          <Link to="/Faculty/Subject_view" className={`nav-link ${styles.nav_link}`}>Subjects</Link>
+          <Link to="/faculty/Subject_view" className={`nav-link ${styles.nav_link}`}>Subjects</Link>
         </li>
-        
+        <li className={`nav-item ${styles.nav_item}`}>
+          <Link to="/faculty/Approval" className={`nav-link ${styles.nav_link}`}>Approval</Link>
+        </li>
       </ul>
       <div className="dropdown ms-auto">
         <img src={imgprofile} alt="Profile Image" className="dropdown-toggle profile-img" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" />
         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-        <Link to="/Faculty/Profile"><li><span className="dropdown-item ">Profile</span></li></Link>
-          <Link to="/Faculty/Edit_Profile"><li><span className="dropdown-item">Edit Profile</span></li></Link>
+        <Link to="/faculty/Profile"><li><span className="dropdown-item ">Profile</span></li></Link>
+          <Link to="/faculty/Edit_Profile"><li><span className="dropdown-item">Edit Profile</span></li></Link>
           <Link to =""><li><span className="dropdown-item" onClick={logout}>Logout</span></li></Link>
         </ul>
       </div>
@@ -114,9 +119,10 @@ let localdata=""
             <div className="row">
                 <div className="col-lg-4 col-12 mb-3">
                     <div className={`card ${styles.card1}`}>
-                        <img src={profile} className="card-img-top" alt="profile" />
+                        <img src={Profile} className="card-img-top" alt={"./profileimg.svg"} />
                         <div className="card-body">
                             <h5 className="card-title"><strong>{name}</strong></h5>
+                            
                             <p className="card-text"><strong>{qualification}</strong></p>
                         </div>
                     </div>
@@ -138,23 +144,28 @@ let localdata=""
                                     <th>Gender</th>
                                     <td>{gender}</td>
                                 </tr>
-                              
                                 <tr>
                                     <th>Mobile</th>
                                     <td>{mobile}</td>
                                 </tr>
                                 <tr>
                                     <th>Classes Handling</th>
-                                    <td>2-CSEA, 3-ECE B</td>
+                                    {classes.map((x)=>(
+                                        <p id="pe">{x}</p>
+                                    ))}
                                 </tr>
                                 <tr>
                                     <th>Subjects Handling</th>
-                                    <td>Python, VLSI</td>
+
+                                    {subjects.map((x)=>(
+                                        <p id="pe">{x}</p>
+                                    ))}
                                 </tr>
                                 <tr>
                                     <th>Department</th>
                                     <td>{dept}</td>
                                 </tr>
+                                
                                 <tr>
                                     <th>Designation</th>
                                     <td>
@@ -212,35 +223,41 @@ let localdata=""
                     <table className={`table table-hover ${styles.table_below}`}>
                         <thead>
                             <tr>
-                                <th scope="col">Student Name</th>
+                                <th scope="col">Subject Name</th>
                                 <th scope="col">Total Topics</th>
-                                <th scope="col">Not Started Topics</th>
-                                <th scope="col" className="text-danger">Pending Topics</th>
+                                <th scope="col" className="text-danger">Not Started Topics</th>
                                 <th scope="col" className="text-success">Completed Topics</th>
+                                <th scope="col" className="text-danger">Pending Hours</th>
+                                <th scope="col" className="text-success">Completed Hours</th>
+                                <th scope="col" className="text-success">Target Hours</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>DSA Python</td>
-                                <td>100</td>
+                            {console.log(data2)}
+                            
+
+                                {data2.map((x)=>(
+                                   <tr> 
+                                    <td>{x.Subject}</td>
+                                    <td>{x.Total}</td>
+                                   <td>{x.NotStarted}</td>
+                                   <td>{x.Completed}</td>
+                                   <td>{x.pendinghours}</td>
+                                   <td>{x.completedhours}</td>
+                                   <td>{x.expectedhourstocomplete}</td>
+                                   
+                                   
+                                   
+                                   </tr>
+
+                                ))}
+                                
+                                {/* <td>100</td>
                                 <td>60</td>
                                 <td className="text-danger">4</td>
-                                <td className="text-success">36</td>
-                            </tr>
-                            <tr>
-                                <td>DSA Python</td>
-                                <td>100</td>
-                                <td>60</td>
-                                <td className="text-danger">4</td>
-                                <td className="text-success">36</td>
-                            </tr>
-                            <tr>
-                                <td>DSA Python</td>
-                                <td>100</td>
-                                <td>60</td>
-                                <td className="text-danger">4</td>
-                                <td className="text-success">36</td>
-                            </tr>
+                                <td className="text-success">36</td> */}
+                           
+                          
                             
                         </tbody>
                     </table>

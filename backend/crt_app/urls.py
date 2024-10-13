@@ -9,6 +9,7 @@ from .view_subject import *
 from .views_topics import *
 from .view_forgetpassword import *
 from .views_lsp import *
+from .approve_lsp import *
 urlpatterns = [
     path("api/college/", CollegeDetailsView.as_view()),
     path("api/class/", ClassDetailView.as_view()),
@@ -25,6 +26,10 @@ urlpatterns = [
     path('api/GetApprovalStats/', GetApprovalStats.as_view(), name='topics'),
     path('api/LessonPlanEdit/', LessonPlanEditView.as_view(), name='lessonplans'),
     path('api/u/', TopicDetailView.as_view(), name='topicslsp'),
+    path('api/t/', TriggerView.as_view(), name='trigger'),
+    path('api/lspappro/', LspView.as_view(), name='lspapr'),
+
+    
 
     path('api/GetSubjectsByDepartment/', GetSubjectsByDepartment.as_view(), name='topics'),
     path('api/GetSubjectsOfFacultyByDepartment/', GetSubjectsOfFacultyByDepartment.as_view(), name='topics'),

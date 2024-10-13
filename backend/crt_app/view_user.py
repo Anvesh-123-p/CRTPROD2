@@ -130,15 +130,24 @@ class UserView(APIView):
             d=serializer.data
             d['subjects']=l
             d['classes']=c
-            print(d)
-            print(daya,"(((((((((())))))))))")
+           
             daya2=[]
+            daya3=[]
+            daya4=[]
+            daya5=[]
+            daya6=[]
+            daya7=[]
+            
 
             for i in daya:
                 try:
                     lp33 = get_object_or_404(LessonPlan, subject_id=i)   
                     ls = LessonPlanSerializer(lp33)
                     daya2.append(ls.data['id'])
+                    
+                    daya5.append(ls.data['pendinghours'])
+                    daya6.append(ls.data['completedhours'])
+                    daya7.append(ls.data['expectedhourstocomplete'])
                 except:
                     pass
             print(daya2)
@@ -147,7 +156,11 @@ class UserView(APIView):
                 sub={'Completed':0,
                 'NotStarted':0,
                 'Pending':0,
-                'Total':0}
+                'Total':0,
+               
+                'pendinghours':daya5[i],
+                'completedhours':daya6[i],
+               'expectedhourstocomplete':daya7[i],}
                 topic30 = Topic.objects.filter(LessonPlan_id=daya2[i])   
                 ts = TopicSerializer(topic30,many=True)
                 total=len(ts.data)
@@ -287,40 +300,6 @@ class UserView(APIView):
                 {"status": "error", "message": "User not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
-
-        # Determine the fields to update based on user type
-        # existing_values = {
-        #     'name': user.name,
-        #     'dept': user.dept,
-        #     'email': user.email,
-        #     'gender': user.gender,
-        #     'mobile_number': user.mobile_number,
-        #     'password': user.password,
-        #     'user_type': user.user_type,
-        #     'status': user.status,
-        #     'clg_name': user.clg_name,
-        #     'class_id': user.class_id,
-        #     'profile_photo': user.profile_photo
-        # }
-        #
-        # if user.user_type == 'ST':
-        #     existing_values.update({
-        #         'roll_number': user.roll_number,
-        #         'graduation_year': user.graduation_year
-        #     })
-        # else:
-        #     existing_values.update({
-        #
-        #         'designation': user.designation,
-        #         'qualification': user.qualification,
-        #         'experience': user.experience
-        #     })
-        #
-        # # Update existing values with request data
-        # updated_fields = {key: value for key, value in request.data.items() if key in existing_values}
-        # updated_fields['status'] = existing_values['status']  # Status shouldn't change
-        #
-        # # Serialize and save the user with updated fields
 
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():

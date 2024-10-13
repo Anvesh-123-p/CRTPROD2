@@ -20,19 +20,12 @@ import Faculty_Edit from './components/Faculty/Faculty_Edit/Faculty_Edit';
 
 
 
-import Approval_New_Account from './components/Approval_Data/Approval_New_Account/Approval_Account';
-import Approval_Lesson_Plan from './components/Approval_Data/Approval_Lesson_Plan/Approval_Lesson';
-
-import Lesson_plan from './components/Faculty/Faculty_lesson_plan/Lesson_plan';
-
-import Create_Subject from './components/Subjects/Create_Subject/create_subject';
-import Edit_Subject from './components/Subjects/Edit_Subject/edit_subject';
 
 
 
 
 
-import Faculty_Profilel from './components/Faculty/Faculty_Profile/Faculty_Profile';
+
 
 import Forgot_Pass from './components/Forget Password/Forgot_Pass/Forgot_Pass';
 

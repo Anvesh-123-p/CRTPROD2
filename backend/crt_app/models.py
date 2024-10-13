@@ -1,7 +1,7 @@
 from django.db import models
 import re
 from django.core.exceptions import ValidationError
-
+from datetime import datetime
 # Constants for choices
 SEMESTER_CHOICES = [
     (1, 'I'), (2, 'II'), (3, 'III'), (4, 'IV'),
@@ -18,7 +18,7 @@ DEPT_CHOICES = [
 
 
 STATUS_CHOICES_LSP = [
-    ('In Progress', 'In Progress'), ('Completed', 'Completed'),('Pending for Approval', 'Pending for Approval'),('Rejected', 'Rejected'),('Not Created', 'Not Created'),
+    ('In Progress', 'In Progress'), ('Completed', 'Completed'),('Pending For Approval', 'Pending For Approval'),('Rejected', 'Rejected'),('Not Created', 'Not Created'),
 ]
 
 GENDER_CHOICES = [
@@ -161,6 +161,10 @@ class Subject(models.Model):
     name = models.CharField(max_length=100)
     faculty_id = models.ForeignKey(User,on_delete=models.CASCADE)
     class_id = models.ForeignKey(Class, on_delete=models.CASCADE)
+    hoursperweek=models.IntegerField(default=1)
+    startdate = models.DateField(null=True,blank=True)
+
+    totalhours=models.IntegerField(default=60)
 
     def __str__(self):
         return self.name
@@ -169,9 +173,15 @@ class Subject(models.Model):
 
 
 class LessonPlan(models.Model):
-    name = models.CharField(max_length=255)
+    # name = models.CharField(max_length=255)
     subject_id = models.OneToOneField(Subject, on_delete=models.CASCADE)
     status = models.CharField(max_length=40, choices=STATUS_CHOICES_LSP, default='Not Created')
+    totalhours=models.IntegerField(default=0)
+    pendinghours=models.IntegerField(default=0)
+    completedhours=models.IntegerField(default=0)
+    pendingpercent=models.IntegerField(default=0)
+    completedpercent=models.IntegerField(default=0)
+    expectedhourstocomplete=models.IntegerField(default=0)
 
     def total_hours(self):
         return self.topic.aggregate(total=models.Sum('hours'))['total'] or 0
@@ -179,12 +189,14 @@ class LessonPlan(models.Model):
 
 class Topic(models.Model):
     STATUS_CHOICES = [
-        ('Not Started', 'Not Started'), ('Completed', 'Completed'),('Pending', 'Pending')
+        ('Not Started', 'Not Started'), ('Completed', 'Completed'),
     ]
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     LessonPlan_id=models.ForeignKey(LessonPlan, on_delete=models.CASCADE,blank=True, null=True)
     hours = models.IntegerField()
+    percent_constituting = models.IntegerField(default=0)
+
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Not Started')
     # comments = models.TextField(blank=True, null=True)
     # actual_completed_date = models.DateField(blank=True, null=True)

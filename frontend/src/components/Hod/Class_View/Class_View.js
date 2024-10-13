@@ -84,7 +84,7 @@ let url='http://localhost:8000/api/class/'
       axios.post(url,data).then(
           (response)=>{
               console.log(response.data)
-              setch(2)
+              setch(2+ch)
 
             }
           
@@ -119,7 +119,9 @@ let url='http://localhost:8000/api/class/'
             response.data.data
 
           )
-          setch(0)
+          setch(2+ch)
+          setShowreje(false)
+
 
         }
       

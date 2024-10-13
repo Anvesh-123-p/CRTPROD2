@@ -6,7 +6,11 @@ from .serializers import *
 from rest_framework import status
 import smtplib
 import ast
+import pandas as pd
+from datetime import date
+from datetime import datetime, timedelta
 
+# Returns the current local date
 def sendmail(stu_name,approval_type,old_data,new_data,receiver):
     server =smtplib.SMTP("smtp.gmail.com",587)
     server.starttls()
@@ -89,17 +93,12 @@ class ApprovalView(APIView):
                 result['new_data']['user_type']='Student'
             else:
                 clid= result['new_data']['clg_name']
-                clsd= result['new_data']['class_id']
+                
                 college = College.objects.get(id=clid)
-                clas = Class.objects.get(class_id=clsd)
                 collegeserializer = CollegeSerializer(college)
-                clseriali = ClassSerializer(clas)
 
                 college_actual_name=collegeserializer.data['name']
-                class_actual_name=str(clseriali.data['sem'])+"--"+str(clseriali.data['dept'])+"--"+str(clseriali.data['sec'])
-                print(class_actual_name)
                 result['new_data']['clg_name']=college_actual_name
-                result['new_data']['class_id']=class_actual_name
                 result['new_data']['user_type']='Faculty'
         else:
           
@@ -143,7 +142,7 @@ class ApprovalView(APIView):
         print(action,approval_id)
         if not action or not approval_id:
             return Response({'error': 'Action and approval_id are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         try:
             approval = Approval.objects.get(approval_id=approval_id)
             # Retrieve details from the approval record
@@ -153,9 +152,11 @@ class ApprovalView(APIView):
             new_data = approval.new_data
             user_name=approval.user_name
             # Retrieve the associated user
-            user = User.objects.get(email=user_email)
+            
             
             if action == 'approved':
+
+                user = User.objects.get(email=user_email)
                
                 print("12345")
                 user.status = 'AC'
@@ -174,6 +175,7 @@ class ApprovalView(APIView):
                 sendmail_response(user_name,approval_type,old_data,new_data,user_email,action)
                 return Response({'message': 'Approval accepted and user updated successfully.'}, status=status.HTTP_200_OK)        
             elif action == 'rejected':
+                user = User.objects.get(email=user_email)
                 approval.status = 'Rejected'
                 user.delete()
                 approval.save()
@@ -273,3 +275,54 @@ def reset_password( email, new_password):
             return "Password successfully reset."
         else:
             raise ValidationError("Invalid reset code or code expired.")
+
+class TriggerView(APIView):
+    def post(self, request):
+        data = request.data
+        dept=data['department']
+        classes = Class.objects.filter(dept=dept)  # Using the ID field for filtering
+        serializer = ClassSerializer(classes, many=True)
+        classarr=[]
+        for i in serializer.data:
+            classarr.append(i['class_id'])
+        print(classarr)
+        subsdict={}
+        # today = date.today()
+        for i in classarr:
+            subjects = Subject.objects.filter(class_id=i)  # Using the ID field for filtering
+            subserializer = SubjectSerializer(subjects, many=True)
+            subs=[]
+            
+
+            for j in subserializer.data:
+                subs.append(j['sub_id'])
+                hpw=j['hoursperweek']
+                sda=j['startdate']
+                print(type(sda))
+                sdaupdated=datetime.strptime(sda,'%Y-%m-%d')
+                today = pd.to_datetime('today').normalize()
+                diff=today-sdaupdated
+                print(diff)
+                wee=diff//7
+                val=wee.days*hpw
+                if(val<0):
+                    val=0
+                   # Get the subject object
+                lspl = get_object_or_404(LessonPlan, subject_id=j['sub_id'])
+                lspldat={
+                    "expectedhourstocomplete":val
+                }
+                lsplserializer = LessonPlanSerializer(lspl, data=lspldat, partial=True)
+                if(lsplserializer.is_valid()):
+                    lsplserializer.save()
+
+
+
+                # print(sda)
+
+
+
+
+            subsdict[i]=subs
+
+

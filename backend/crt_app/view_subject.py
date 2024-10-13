@@ -73,6 +73,7 @@ class SubjectView(APIView):
 
     # PATCH: Update an existing subject
     def patch(self, request, *args, **kwargs):
+        print("hi")
         sub_id = request.data.get('sub_id')
         
         if not sub_id:
@@ -80,6 +81,7 @@ class SubjectView(APIView):
                 {"status": "error", "message": "Subject ID is required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        print(sub_id)
         
         # Get the subject object
         subject = get_object_or_404(Subject, sub_id=sub_id)
@@ -130,12 +132,19 @@ class GetSubjectsOfFacultyByDepartment(APIView):
 class GetSubjectsByDepartment(APIView):
     def get(self, request, *args, **kwargs):
         dept = request.query_params.get('dept')
-
         if not dept:
             return Response({"error": "Department is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if(request.query_params.get('eid')):
+            eid=request.query_params.get('eid')
+            subjects = Subject.objects.filter(faculty_id=eid).filter(class_id__dept=dept)
 
+        
+
+        
+        
+        else:
         # Fetch all subjects associated with the department
-        subjects = Subject.objects.filter(class_id__dept=dept)
+            subjects = Subject.objects.filter(class_id__dept=dept)
         
         s = SubjectSerializer(subjects, many=True)
         res=[]
@@ -164,6 +173,9 @@ class GetSubjectsByDepartment(APIView):
             de['class_id']=clssname
             de['sub_id']=i['sub_id']
             de['name']=i['name']
+            de['hoursperweek']=i['hoursperweek']
+            de['startdate']=i['startdate']
+            de['totalhours']=i['totalhours']
 
             de['lspid']=lspserializer.data['id']
             de['lspstatus']=lspserializer.data['status']

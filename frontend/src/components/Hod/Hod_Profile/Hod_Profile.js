@@ -225,9 +225,11 @@ const Hod_Profile = () => {
                             <tr>
                                 <th scope="col">Subject Name</th>
                                 <th scope="col">Total Topics</th>
-                                <th scope="col">Not Started Topics</th>
-                                <th scope="col" className="text-danger">Pending Topics</th>
+                                <th scope="col" className="text-danger">Not Started Topics</th>
                                 <th scope="col" className="text-success">Completed Topics</th>
+                                <th scope="col" className="text-danger">Pending Hours</th>
+                                <th scope="col" className="text-success">Completed Hours</th>
+                                <th scope="col" className="text-success">Target Hours</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -239,8 +241,10 @@ const Hod_Profile = () => {
                                     <td>{x.Subject}</td>
                                     <td>{x.Total}</td>
                                    <td>{x.NotStarted}</td>
-                                   <td>{x.Pending}</td>
                                    <td>{x.Completed}</td>
+                                   <td>{x.pendinghours}</td>
+                                   <td>{x.completedhours}</td>
+                                   <td>{x.expectedhourstocomplete}</td>
                                    
                                    
                                    

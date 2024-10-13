@@ -24,7 +24,7 @@ const handleSubmit=(e)=>{
         if(response.status==200){
             alert('Your Account has been succefully Updated, Navigating to Home Page ');
             setTimeout(() => {
-                navigate('/faculty/home/');
+                navigate('/hod/home/');
                 }, 2000);
 
 

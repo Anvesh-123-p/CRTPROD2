@@ -44,8 +44,73 @@ class TopicDetailView(APIView):
             # return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-#     def patch(self, request):
-#         pass
+    def patch(self, request):
+        tid = request.data.get('id')
+        
+        if not id:
+            return Response(
+                {"status": "error", "message": "Topic id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            to = Topic.objects.get(id=tid)
+        except to.DoesNotExist:
+            return Response(
+                {"status": "error", "message": "Topic not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = TopicSerializer(to, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            queryset = Topic.objects.filter(LessonPlan_id=request.data['LessonPlan_id'])  
+            serializertop = TopicSerializer(queryset,many=True)
+            q=1
+            pencount=0
+            cocount=0
+            for i in serializertop.data:
+                if(i['status']=='Not Started'):
+                    q=0
+                    pencount=pencount+i['hours']
+                else:
+                    cocount=cocount+i['hours']
+            if(q==1):
+                d={
+                    'status':'Completed',
+                    'completedhours':cocount,
+                    'pendinghours':pencount
+                }
+                lsp = LessonPlan.objects.get(id = request.data['LessonPlan_id'])
+                lspser = LessonPlanSerializer(lsp, data=d, partial=True)
+                if lspser.is_valid():
+                    lspser.save()
+                    return Response({"status": "success", "data": 'Subject Fully Completed'}, status=200)
+
+
+            else:
+                d={
+                    'status':'In Progress',
+                    'completedhours':cocount,
+                    'pendinghours':pencount
+                    
+                }
+                lsp = LessonPlan.objects.get(id = request.data['LessonPlan_id'])
+                lspser = LessonPlanSerializer(lsp, data=d, partial=True)
+                if lspser.is_valid():
+                    lspser.save()
+                    return Response({"status": "success", "data": 'Subject Fully Completed'}, status=200)
+
+
+
+
+
+            return Response({"status": "success", "data": TopicSerializer(to).data}, status=200)
+        else:
+            return Response({"status": "error", "data": serializer.errors}, status=400)
+
+        
     
     def delete(self, request):
         param = request.GET

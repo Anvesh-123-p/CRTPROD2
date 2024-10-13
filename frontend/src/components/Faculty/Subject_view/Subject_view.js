@@ -18,13 +18,19 @@ const Subject_view = () => {
     const[showForm,setShowForm]=useState(false);
     const[ch,setch]=useState(0);
     const[showlsp,setShowlsp]=useState(false);
+    const[showlsp2,setShowlsp2]=useState(false);
+
     const[lspid,setlspid]=useState("");
     const[subname,setsubname]=useState(false);
     const[topicname,settopicname]=useState("");
+    const[topicname2,settopicname2]=useState("");
     const[duration,setduration]=useState("");
-
+    const[duration2,setduration2]=useState("");
+    const[status2,setstatus2]=useState("");
     const[classes,setclasses]=useState([])
     const[tdata,settdata]=useState([])
+    const[tdata7,settdata7]=useState([])
+
 
     const [fac,setfac]=useState([]);
     const [clsid,setclsid]=useState();
@@ -54,7 +60,7 @@ let url ="http://localhost:8000/api/subjects/";
 
         axios.post(url,data).then(
             (response)=>{
-                console.log("Subject Created")
+                alert("Subject Created")
   
               }
             
@@ -88,24 +94,45 @@ let url ="http://localhost:8000/api/subjects/";
         })
 
       }
+
+      const toic2=(e)=>{
+        setShowlsp2(true)
+        setlspid(e)
+
+      let url = "http://127.0.0.1:8000/api/u/?lspid="+e
+
+        axios.get(url).then((response)=>{
+          console.log(response.data)
+          settdata7(response.data.data)
+          
+        
+        
+          
+        })
+
+      }
       const tname=(e)=>{
         console.log(e)
         console.log(e.target.value)
         settopicname(e.target.value)
       }
+      
       const dur=(e)=>{
         console.log(e)
         console.log(e.target.value)
         setduration(e.target.value)
       }
       const appr=(e)=>{
+        if(localStorage.getItem('token')!=null){
         console.log(e)
+        const localdata = JSON.parse(localStorage.getItem("token"));
+
         let dat ={
           "lspid":e,
           "email":localdata.email,
-          "name":localdata.name,
+          // "name":localdata.name,
           "dept":localdata.dept,
-          "status":"Pending for Approval"
+          "status":"Pending For Approval"
         }
         let url ="http://127.0.0.1:8000/api/LessonPlanEdit/"
         
@@ -127,11 +154,14 @@ let url ="http://localhost:8000/api/subjects/";
           }
     
          })
-      }
+         } }
       const Facid=(e)=>{
         console.log(e)
         console.log(e.target.value)
         setfacid(e.target.value)
+      }
+      const handlestat=(e)=>{
+        setstatus2(e.target.value)
       }
       const logout=()=>{
         localStorage.clear()
@@ -141,7 +171,6 @@ let url ="http://localhost:8000/api/subjects/";
 
     }
     const handleCloselsp=(e)=>{
-      // setShowlsp(false);
       console.log(e)
       let delurl="http://127.0.0.1:8000/api/u/?id="+e
       axios.delete(delurl).then(
@@ -161,6 +190,39 @@ let url ="http://localhost:8000/api/subjects/";
 
 
   }
+
+  const handleCloselsp2=(e)=>{
+    console.log(e)
+    console.log(status2)
+    let data2= {
+      'status':status2,
+      'LessonPlan_id':lspid,
+      'id':e
+    }
+    if(status2.length!=0){
+    console.log(data2)
+    let paturl="http://127.0.0.1:8000/api/u/"
+    axios.patch(paturl,data2).then(
+      (response)=>{
+        console.log(response)
+        
+          alert(
+            "Updated Succesfully"
+
+          )
+          setShowlsp2(false)
+          setch(ch+1)
+          
+
+        }
+      
+      ).catch((err) => alert(JSON.stringify(err.response.data)))
+    }
+    else{
+      alert("Update Topic status to save")
+    }
+
+}
     const createlsp=()=>{
       console.log("hello")
       let topicdata={
@@ -175,7 +237,6 @@ let url ="http://localhost:8000/api/subjects/";
       axios.post(url,topicdata).then(
         (response)=>{
             console.log(response)
-            // toic(hh)
             setduration("")
             settopicname("")
             settdata(response.data.data)
@@ -187,34 +248,21 @@ let url ="http://localhost:8000/api/subjects/";
       
     }
     
-    const formopen=()=>{
-        setShowForm(true);
-        const localdata = JSON.parse(localStorage.getItem("token"));
-        console.log(localdata.dept)
-        let classesurl="http://localhost:8000/api/class/?dept="+localdata.dept
-        let facurl="http://localhost:8000/api/users/?user_type=FAC&dept="+localdata.dept
+    
 
-
-        axios.get(classesurl).then((response)=>{
-              if(response.data.data.length!=0)
-            setclasses(response.data.data)
-          })
-          axios.get(facurl).then((response)=>{
-            if(response.data.data.length!=0)
-          setfac(response.data.data)
-        })
-    }
-    const localdata = JSON.parse(localStorage.getItem("token"));
-
-    let substats="http://localhost:8000/api/GetSubjectsByDepartment/?dept="+localdata.dept
     useEffect(() => {
+      if(localStorage.getItem('token')!=null){
+      const localdata = JSON.parse(localStorage.getItem("token"));
+      
+
+      let substats="http://localhost:8000/api/GetSubjectsByDepartment/?dept="+localdata.dept+"&eid="+localdata.id
       
         axios.get(substats).then((response)=>{
           setd(response.data.subjects)
       
 
           }
-    )
+    )}
       },[ch]);
     return (
         <div>
@@ -268,7 +316,56 @@ let url ="http://localhost:8000/api/subjects/";
               
               </div>
               <button onClick={()=>appr(lspid)}>Submit For Approval</button>
-              <button onClick={()=>{setShowlsp(false);}}>Cancel</button>
+              <button onClick={()=>{setShowlsp(false);}}>Close</button>
+            </ModalBody>
+        </Modal>
+
+        <Modal size='lg'
+        isOpen={showlsp2}>
+                      toggle={()=>setShowlsp2(true)}
+            <ModalHeader
+            toggle={()=>setShowlsp2(false)}> 
+            Edit Lesson Plan 
+            </ModalHeader>
+        <ModalBody>
+
+{
+  
+        tdata7.map((x)=>(
+        <div class="row g-5 mb-3">
+                <div class="col ">
+                    <label>Topic Name</label>
+                    <input type="text" className={`form-control ${styles.input}`}    placeholder="Topic name" aria-label="Topic name" value={x.name}/>
+                </div>
+                <div class="col ">
+                    <label>Duration</label>
+                    <input type="text" className={`form-control ${styles.input}`}    placeholder="Duration" aria-label="Duration" value={x.hours}/>
+                </div>
+                <div class="col ">
+                    <label>Status</label>
+                    <label htmlFor="inputState" className="form-label ">Department</label>
+                <select id="inputState" onChange={(e)=>{handlestat(e)}} className="form-select border border-dark" required>
+                <option defaultValue>{x.status}</option>
+                {x.status=='Not Started' &&<option value="Completed">Completed</option>}
+                {x.status=='Completed' &&<option value="Not Started">Not Started</option>}
+
+                
+                </select>                </div>
+                <div class="col">
+              <button className="btn btn-secondary" onClick={()=>handleCloselsp2(x.id)}>Save Topic</button></div>
+              </div>
+        ))}
+
+
+
+
+
+
+
+
+       
+              {/* <button onClick={()=>appr2(lspid)}>Submit</button> */}
+              <button onClick={()=>{setShowlsp2(false);}}>Close</button>
             </ModalBody>
         </Modal>
                  <Modal size='lg'
@@ -277,7 +374,7 @@ let url ="http://localhost:8000/api/subjects/";
             toggle={()=>setShowForm(true)}>
             <ModalHeader
             toggle={()=>setShowForm(false)}> 
-            Add Drive   
+            Add Subject   
             </ModalHeader>
             <ModalBody>
             <form className="form-inline " id="StudentModal" onSubmit={(e) => {
@@ -324,7 +421,7 @@ let url ="http://localhost:8000/api/subjects/";
     <div className={`collapse navbar-collapse ${styles.collapse}`} id="navbarSupportedContent">
       <ul className={`navbar-nav me-auto mb-2 mb-lg-0 ${styles.navbar_nav}`}>
         <li className={`nav-item ${styles.nav_item}`}>
-          <Link to="/faculty/Home_View" className={`nav-link ${styles.nav_link}`} aria-current="page">Home</Link>
+          <Link to="/Faculty/Home" className={`nav-link ${styles.nav_link}`} aria-current="page">Home</Link>
         </li>
         <li className={`nav-item ${styles.nav_item}`}>
           <Link to="/faculty/Class_View" className={`nav-link ${styles.nav_link}`} >Classes</Link>
@@ -399,9 +496,14 @@ let url ="http://localhost:8000/api/subjects/";
                         <td>{x.faculty_id}</td>
                         <td>{x.class_id}</td>
                         <td>{x.lspstatus}</td>
+                        
   
                         {x.lspstatus=="Not Created" && <td><button onClick={() => toic(x.lspid)}>Create Lesson Plan</button></td>}
-                        {x.lspstatus!="Not Created" && <td><a href="#">Edit</a></td>}
+                        {x.lspstatus=="Rejected" && <td><button onClick={() => toic(x.lspid)}>Create Lesson Plan</button></td>}
+                        {x.lspstatus=="Completed" && <td><button onClick={() => toic2(x.lspid)}>Edit Completed Subject</button></td>}
+
+                        {x.lspstatus=="In Progress" && <td><button onClick={() => toic2(x.lspid)}>Edit</button></td>}
+                        {x.lspstatus=="Pending For Approval" && <td><a href="#">--</a></td>}
                         {/* <td>
                             <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
                                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
@@ -421,10 +523,13 @@ let url ="http://localhost:8000/api/subjects/";
                     <td>{x.class_id}</td>
                     <td>{x.lspstatus}</td>
                     {x.lspstatus=="Not Created" && <td><button onClick={() => toic(x.lspid)}>Create Lesson Plan</button></td>}
+                    {x.lspstatus=="Rejected" && <td><button onClick={() => toic(x.lspid)}>Create Lesson Plan</button></td>}
+                    {x.lspstatus=="Completed" && <td><button onClick={() => toic2(x.lspid)}>Edit Completed Subject</button></td>}
 
 
 
-                    {x.lspstatus!="Not Created" && <td><a href="#">Edit</a></td>}
+                    {x.lspstatus=="In Progress" && <td><button onClick={() => toic2(x.lspid)}>Edit</button></td>}
+                    {x.lspstatus=="Pending For Approval" && <td><a href="#">--</a></td>}
                     {/* <td>
                         <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
                             <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
